@@ -327,3 +327,93 @@ The technology stack spans the active prototype implementation and the planned p
 │ • Optional Anthropic API Client   │ • AbuseIPDB, VirusTotal, OTX APIs  │
 └───────────────────────────────────┴────────────────────────────────────┘
 ```
+
+---
+
+## Installation and Setup
+
+### Prerequisites
+
+- **Python:** Version 3.10 or later (verified compatible up to Python 3.14).
+- **Git:** Version 2.30+.
+- **Web Browser:** Modern browser supporting WebSockets and ES6 JavaScript (Chrome, Firefox, Safari, Edge).
+
+### 1. Clone Repository & Create Virtual Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/madhura200227/DefenceIQ.git
+cd DefenceIQ
+
+# Create a virtual environment
+python -m venv .venv
+
+# Activate on Linux / macOS:
+source .venv/bin/activate
+
+# Activate on Windows (PowerShell):
+.venv\Scripts\Activate.ps1
+```
+
+### 2. Install Verified Dependencies
+
+The prototype dependencies are verified against `main.py` and `soc-pilot/soc-pilot/requirements.txt`:
+
+```bash
+# Option A: Install from the nested requirements file
+pip install -r soc-pilot/soc-pilot/requirements.txt
+
+# Option B: Direct installation
+pip install fastapi "uvicorn[standard]" httpx
+```
+
+### 3. Launch the Prototype Server
+
+```bash
+uvicorn main:app --reload
+```
+
+The application starts on `http://127.0.0.1:8000`.
+
+### 4. Interactive Walkthrough & Verification
+
+1. **Open the Dashboard:** Navigate to `http://localhost:8000` in your web browser.
+2. **Trigger Simulated Attack:** Click the **"Launch simulated attack"** button in the header. The backend executes a 7-alert enterprise scenario representing brute-force VPN access, lateral database scanning, impossible travel, and data exfiltration.
+3. **Observe Real-Time Tracing:** Watch the **Live agent trace** middle column. The WebSocket connection streams every triage assessment, MITRE mapping, citation check, and prompt-injection quarantine in real time.
+4. **Interact with the Approval Gate:** When alert `A-103`, `A-104`, or `A-105` triggers high-risk containment actions (`block_ip`, `disable_account`, `isolate_host`), the run pauses. In the right column under **Pending approvals**, click **Approve** or **Reject** to resume the workflow.
+5. **Inspect Confusion Matrix & Metrics:** Click **"Run eval"** to invoke the `/api/eval` endpoint, displaying true positives, false positives, triage latency, and detection rates.
+
+---
+
+## Environment Configuration
+
+Configure DefenceIQ runtime parameters via environment variables or a `.env` file:
+
+| Variable | Type | Default | Description |
+|---|---|---|---|
+| `SOCPILOT_DB` / `DEFENCEIQ_DB` | String | `:memory:` | SQLite database connection path. Set to a file path (e.g., `audit.db`) to persist alerts, incident status, and audit records across server restarts. |
+| `PACE` | Float | `0.6` | Delay in seconds between simulated agent actions. Slows down WebSocket streaming so human observers can follow the trace. Set to `0.2` for rapid automated execution. |
+| `ANTHROPIC_API_KEY` | String | *(None / Optional)* | When set, enables optional AI-generated natural language incident summaries via Claude. If omitted, the system falls back gracefully to deterministic rule-based reports. |
+| `MODEL` | String | `claude-sonnet-5-5` | Model identifier used for natural language narration when `ANTHROPIC_API_KEY` is active. |
+| `PORT` | Integer | `8000` | Local port for Uvicorn server execution. |
+
+---
+
+## Project Structure
+
+```
+DefenceIQ/
+├── docs/
+│   └── DEFENCEIQ_ARCHITECTURE.md   # Complete system architecture & technical design specification
+├── soc-pilot/
+│   └── soc-pilot/                  # Packaged reference prototype and requirements
+│       ├── index.html              # Standalone prototype UI
+│       ├── main.py                 # Reference server implementation
+│       ├── README.md               # Quick-start instructions
+│       └── requirements.txt        # Pinned core dependencies
+├── main.py                         # Root ASGI application: state graph, 4 agents, tools, audit triggers
+├── index.html                      # Single-page web dashboard with WebSocket live streaming
+├── README.md                       # Comprehensive repository documentation & landing page
+├── LICENSE                         # MIT Open Source License
+└── .gitignore                      # Git exclusion rules for Python caches, DBs, and environments
+```
