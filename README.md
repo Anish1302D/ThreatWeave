@@ -201,3 +201,81 @@ flowchart TD
 | **07 · Audit & Presentation** | Maintain immutable event history via triggers; stream trace events to UI. | [Dashboard & Reporting](docs/DEFENCEIQ_ARCHITECTURE.md#67-dashboard--reporting) |
 
 For complete technical specifications, database schema diagrams, and sequence flows, refer to [docs/DEFENCEIQ_ARCHITECTURE.md](docs/DEFENCEIQ_ARCHITECTURE.md).
+
+---
+
+## AI Agent Responsibilities & Interaction Protocol
+
+Rather than relying on a single monolithic prompt, DefenceIQ divides security analysis across four specialized agents governed by an orchestrator state graph:
+
+| Agent Role | Primary Focus | Allowlisted Tools | Primary Outputs & Safety Boundaries |
+|---|---|---|---|
+| **Alert Triage Agent** | First-line alert evaluation & noise filtering | `query_history` | Assigns severity (`low`, `medium`, `high`) and confidence score; makes escalation decision (`investigating` vs `closed_noise`). Cannot perform containment actions. |
+| **Threat Intelligence Agent** | External IOC reputation & MITRE ATT&CK mapping | `lookup_ip`, `mitre_map` | Retrieves reputation metrics (e.g., AbuseIPDB confidence, OTX pulses) and maps behavior to ATT&CK tactics (e.g., `T1110.001`, `T1078`). Cannot query raw host logs. |
+| **Forensics & Evidence Agent** | Chronological log analysis & citation enforcement | `query_logs` | Reconstructs event timeline. Quarantines prompt injection payloads. Rejects claims that do not cite valid log identifiers. |
+| **Response Planner Agent** | Proportionate containment planning | `tag_alert`, `add_comment`, `disable_account`, `force_password_reset`, `block_ip`, `isolate_host` | Formulates action list. Distinguishes low-risk auto-run actions (`tag_alert`, `add_comment`) from high-risk containment actions requiring analyst approval. |
+| **Agent Orchestrator** | State transitions & boundary enforcement | N/A (State Graph Engine) | Enforces deterministic execution order (`triage` -> `intel` -> `forensics` -> `response` -> `gate`), strictly manages context windows, and logs all transitions to the audit store. |
+
+### Agent Guardrails & Principles
+
+- **Strict Tool Allowlists:** Each agent can invoke only its explicitly designated tools. Any unauthorized tool call raises an immediate `PermissionError` and is recorded as a `tool_denied` security event.
+- **Untrusted Telemetry Handling:** Log content and external intelligence are treated as untrusted data. Embedded instructions (e.g., `"ignore previous instructions"`) are detected and quarantined before reaching analytical reasoning.
+- **Deterministic Handoffs:** Agents communicate through structured state envelopes containing validated findings, evidence citations, and confidence metrics rather than free-form conversational chatter.
+
+---
+
+## End-to-End Investigation Workflow
+
+The lifecycle of an alert moving through DefenceIQ is governed by a deterministic sequence of state transitions:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Analyst as Security Analyst
+    participant Ingest as Ingestion & DB
+    participant Triage as Triage Agent
+    participant Intel as Threat Intel Agent
+    participant Forensics as Forensics Agent
+    participant Response as Response Planner
+    participant Gate as Human Approval Gate
+    participant Audit as Append-Only Audit Log
+
+    Ingest->>Triage: Ingest Alert (e.g., A-104 failed_login_burst)
+    Triage->>Triage: query_history(user) -> Assess pattern
+    alt Low signal / Benign
+        Triage->>Ingest: Close as noise (status: closed_noise)
+        Triage->>Audit: Log triage verdict & rationale
+    else Escalated (High signal)
+        Triage->>Intel: Escalate to investigating
+        Triage->>Audit: Log escalation & confidence
+        Intel->>Intel: lookup_ip(src_ip) & mitre_map(type)
+        Intel->>Forensics: Forward reputation & ATT&CK mapping
+        Intel->>Audit: Log IOC reputation & MITRE tags
+        Forensics->>Forensics: query_logs(ip, host)
+        Forensics->>Forensics: Quarantine injections & validate citations
+        Forensics->>Response: Forward timeline & cited claims
+        Forensics->>Audit: Log citation check & timeline
+        Response->>Gate: Propose containment actions
+        Gate->>Gate: Execute low-risk actions (tag_alert, add_comment)
+        Gate->>Analyst: Pause run: Approval required (block_ip, isolate_host)
+        Analyst->>Gate: POST /api/approve/{key} (Approve or Reject)
+        alt Analyst Approved
+            Gate->>Gate: Execute containment tool
+            Gate->>Audit: Log execution outcome
+        else Analyst Rejected
+            Gate->>Audit: Log rejection decision (action halted)
+        end
+        Gate->>Ingest: Set status: resolved
+        Gate->>Audit: Log incident completion
+    end
+```
+
+### Detailed Workflow Stages
+
+1. **Ingestion & Registration:** The alert is written to the SQLite `alerts` table with an initial status of `new`. An `alert_received` event is emitted.
+2. **Triage Assessment:** The Triage Agent checks user travel history. If the source matches a known internal asset or baseline benign activity, it is closed with rationale. Otherwise, it escalates.
+3. **Intelligence Enrichment:** The Threat Intel Agent checks IP reputation across threat intelligence pulse data and maps the attack type to the MITRE ATT&CK matrix.
+4. **Forensic Log Reconstruction:** The Forensics Agent retrieves host and network logs, scans for adversarial prompt injections, and validates that every observation cites verified log line IDs.
+5. **Remediation Planning:** The Response Agent proposes actions (e.g., block IP, isolate host, reset password, tag incident).
+6. **Human Approval Gate:** Low-risk administrative actions run automatically; high-risk actions pause until a human analyst submits an approval or rejection decision.
+7. **Resolution & Incident Reporting:** Once actions are executed or rejected, the incident is closed with a comprehensive markdown report and audit log summary.
