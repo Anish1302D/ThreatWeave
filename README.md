@@ -49,3 +49,38 @@ DefenceIQ introduces a structured, AI-assisted investigation pipeline governed b
 - **Tamper-resistant audit trails:** Every alert transition, agent query, tool execution, and analyst decision is recorded in an append-only audit log.
 
 For the comprehensive architectural design, please review the [DefenceIQ Proposed Architecture & Technical Design Document](docs/DEFENCEIQ_ARCHITECTURE.md).
+
+---
+
+## Problem Statement
+
+Modern cybersecurity operations teams face mounting structural obstacles that hinder rapid and effective incident handling:
+
+| Problem Domain | Real-World Operational Challenge | Consequence |
+|---|---|---|
+| **Alert Fatigue** | SOC teams receive tens of thousands of security alerts weekly across endpoints, firewalls, and cloud services. Over 70% are low-fidelity or false positives. | Critical breaches are buried beneath noise, resulting in analyst burnout and missed attacks. |
+| **Fragmented Context** | Security telemetry resides in disconnected silos (e.g., VPN logs, Active Directory, EDR, cloud audit trails). | Correlating a remote VPN brute-force attempt with an internal host transfer requires slow, manual pivoting. |
+| **Investigation Dwell Time** | Analysts must manually look up IP reputations, parse raw log timestamps, and reconstruct chronological timelines. | Mean Time to Detect (MTTD) and Respond (MTTR) stretch from hours into days or weeks. |
+| **Lack of Traceable Evidence** | Automated tools often generate alert verdicts without explaining *why* an event was flagged or *which* log lines substantiate the hypothesis. | Analysts cannot trust opaque recommendations, or compliance auditors reject incident reports for lack of provenance. |
+| **Unsafe Autonomous SOAR** | Traditional SOAR playbooks that trigger automated isolations or account suspensions risk critical operational downtime on false alarms. | Organizations resist automation or suffer inadvertent business interruption. |
+
+---
+
+## Proposed Solution
+
+DefenceIQ solves these challenges by combining structured data processing, modular AI agents, and strict human-in-the-loop controls into a unified security operations workflow:
+
+```
+[ Ingest & Normalize ] ──> [ Correlate & Enrich ] ──> [ Multi-Agent Investigation ] ──> [ Human Approval Gate ] ──> [ Enforce & Audit ]
+```
+
+### Vision
+To build a resilient, explainable security operations platform where AI agents handle the mechanical heavy lifting of log querying, threat intelligence correlation, and timeline assembly—while human analysts retain complete authority over containment and remediation decisions.
+
+### Core Objectives
+1. **Multi-Source Telemetry Ingestion:** Ingest security events across endpoints, network perimeters, cloud infrastructures, and identity providers.
+2. **Deterministic Correlation & Deduplication:** Connect disparate alerts into unified incident candidates using transparent, explainable correlation rules.
+3. **Specialized AI Agents:** Deploy bounded agents specialized in triage, threat intelligence enrichment, digital forensics, and remediation planning.
+4. **Strict Evidence Provenance:** Enforce that every investigative claim maps directly to verified raw log citations before being presented as a finding.
+5. **Human-Governed Remediation:** Provide granular human approval gates ensuring no high-impact action (account disablement, host isolation, IP blocking) executes without analyst sign-off.
+6. **Immutable Audit Trail:** Maintain an append-only ledger of every system event, tool invocation, and human decision for forensic defensibility and compliance.
