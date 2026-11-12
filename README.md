@@ -121,3 +121,83 @@ To ensure verifiable engineering quality, DefenceIQ clearly defines its initial 
 - **Incident Responders:** Review correlated timelines and approve or refine surgical containment proposals.
 - **Security Engineering & Administrators:** Audit automated agent actions, configure tool allowlists, and inspect tamper-proof event logs.
 - **Security Leadership (CISOs & SOC Managers):** Gain visibility into triage accuracy, false-positive reductions, and response latencies without risking unmonitored automation.
+
+---
+
+## Proposed System Architecture
+
+DefenceIQ's architecture is organized into seven decoupled logical layers, separating event processing from presentation and governance:
+
+```mermaid
+flowchart TD
+    subgraph L1["01 · Telemetry Sources"]
+        S1["Endpoint & EDR Telemetry"]
+        S2["Firewall & Network Alerts"]
+        S3["Cloud Identity & Workloads"]
+    end
+
+    subgraph L2["02 · Ingestion & Normalization"]
+        IN1["Source Ingestion Adapters"]
+        IN2["Schema Normalizer & IOC Extractor"]
+        IN3["Correlation & Deduplication Engine"]
+    end
+
+    subgraph L3["03 · Threat Intelligence Layer"]
+        TI1["IOC Reputation (AbuseIPDB, VT, OTX)"]
+        TI2["MITRE ATT&CK Mapping"]
+    end
+
+    subgraph L4["04 · AI Multi-Agent State Graph"]
+        AG1["Triage Agent"]
+        AG2["Threat Intel Agent"]
+        AG3["Forensics Agent"]
+        AG4["Response Planner Agent"]
+    end
+
+    subgraph L5["05 · Evidence & Risk Engine"]
+        EV1["Citation Check & Validation"]
+        EV2["Incident Timeline Builder"]
+        EV3["Explainable Risk Scorer"]
+    end
+
+    subgraph L6["06 · Governance & Approval Gate"]
+        G1{"Human Approval Required?"}
+        G2["Auto-Execute Low Risk (Tag, Comment)"]
+        G3["Analyst Decision (Approve / Reject / Defer)"]
+        G4["Response Action Adapters"]
+    end
+
+    subgraph L7["07 · Audit & Presentation"]
+        AU1["Append-Only Audit Ledger (SQLite / Postgres)"]
+        UI1["Real-Time Analyst Workspace & WS Streaming"]
+    end
+
+    L1 --> IN1
+    IN1 --> IN2 --> IN3
+    IN3 --> AG1
+    IN2 -.-> TI1
+    TI1 --> TI2 --> AG2
+    AG1 --> AG2 --> AG3 --> AG4
+    AG3 --> EV1 --> EV2 --> EV3
+    AG4 --> G1
+    G1 -->|Low Risk Action| G2 --> G4
+    G1 -->|High Risk Action| G3 --> G4
+    G4 --> AU1
+    G3 --> AU1
+    EV2 --> UI1
+    AU1 -.-> UI1
+```
+
+### Architectural Layer Summary & Detailed References
+
+| Layer | Responsibility | Architectural Reference |
+|---|---|---|
+| **01 · Telemetry Ingestion** | Ingest raw event payloads from diverse security systems; validate formatting. | [Ingestion Layer](docs/DEFENCEIQ_ARCHITECTURE.md#61-data-ingestion-layer) |
+| **02 · Normalization & Correlation** | Map source logs to unified schema; correlate related alerts into incident candidates. | [Normalization & Correlation](docs/DEFENCEIQ_ARCHITECTURE.md#62-normalization--correlation-layer) |
+| **03 · Threat Intelligence** | Query IP/hash/domain reputations; map techniques to MITRE ATT&CK matrix. | [Threat Intelligence Layer](docs/DEFENCEIQ_ARCHITECTURE.md#64-threat-intelligence-layer) |
+| **04 · AI Agent Orchestration** | Coordinate bounded agents across triage, intel, forensics, and remediation planning. | [AI Agent Layer](docs/DEFENCEIQ_ARCHITECTURE.md#63-ai-agent-layer) |
+| **05 · Evidence & Risk Engine** | Enforce raw log citation checks; reconstruct chronological incident timelines. | [Evidence & Risk Engine](docs/DEFENCEIQ_ARCHITECTURE.md#65-evidence--risk-engine) |
+| **06 · Response & Approval Gate** | Enforce mandatory analyst approval before executing containment actions. | [Response & Approval Layer](docs/DEFENCEIQ_ARCHITECTURE.md#66-response--approval-layer) |
+| **07 · Audit & Presentation** | Maintain immutable event history via triggers; stream trace events to UI. | [Dashboard & Reporting](docs/DEFENCEIQ_ARCHITECTURE.md#67-dashboard--reporting) |
+
+For complete technical specifications, database schema diagrams, and sequence flows, refer to [docs/DEFENCEIQ_ARCHITECTURE.md](docs/DEFENCEIQ_ARCHITECTURE.md).
