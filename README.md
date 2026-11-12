@@ -84,3 +84,40 @@ To build a resilient, explainable security operations platform where AI agents h
 4. **Strict Evidence Provenance:** Enforce that every investigative claim maps directly to verified raw log citations before being presented as a finding.
 5. **Human-Governed Remediation:** Provide granular human approval gates ensuring no high-impact action (account disablement, host isolation, IP blocking) executes without analyst sign-off.
 6. **Immutable Audit Trail:** Maintain an append-only ledger of every system event, tool invocation, and human decision for forensic defensibility and compliance.
+
+---
+
+## Key Capabilities & MVP Scope
+
+### Core Capabilities
+
+As detailed in the architecture specification, DefenceIQ establishes eight foundational capabilities:
+
+1. **Multi-Source Event Ingestion:** Ingest raw security alerts, audit trails, and syslog records through dedicated source adapters.
+2. **Schema Normalization & Entity Extraction:** Parse diverse source formats into a unified event schema while extracting key indicators of compromise (IOCs: IP addresses, account names, host identifiers, file hashes).
+3. **Deterministic Correlation Engine:** Group correlated alerts across shared entities and temporal windows into unified incident candidates.
+4. **Contextual Threat Intelligence Enrichment:** Automatically query external threat intelligence providers and map activities to MITRE ATT&CK framework tactics and techniques.
+5. **Specialized AI Multi-Agent Orchestration:** Execute a state graph of bounded agents performing initial triage, indicator enrichment, forensic log analysis, and remediation proposal.
+6. **Traceable Timeline & Evidence Graph:** Construct chronological incident timelines where every finding references validated raw telemetry.
+7. **Human-in-the-Loop Approval Gate:** Protect enterprise operations by requiring human analyst authorization before executing non-trivial remediation actions.
+8. **Real-Time Streaming & Immutable Audit Ledger:** Stream agent execution progress in real time via WebSockets and record all decisions in an append-only database.
+
+### Project Scope Boundaries
+
+To ensure verifiable engineering quality, DefenceIQ clearly defines its initial MVP boundaries:
+
+| Dimension | In-Scope for Initial MVP | Out-of-Scope for Initial MVP |
+|---|---|---|
+| **Data Ingestion** | Controlled JSON event inputs, synthetic enterprise attack scenarios, and simulated log streams. | Live production connectors for all commercial SIEM/EDR vendors. |
+| **Correlation** | Rule-based entity correlation (shared user, IP, host) and alert deduplication. | Complex graph neural network clustering or black-box correlation algorithms. |
+| **Threat Intelligence** | Local IOC reputation lookup simulating AbuseIPDB, VirusTotal, and AlienVault OTX, plus static MITRE ATT&CK mapping. | Production enterprise TI feeds requiring paid commercial subscription tiers. |
+| **Agent Reasoning** | Deterministic state graph with bounded tool allowlists and optional LLM narrative synthesis (`ANTHROPIC_API_KEY`). | Unbounded autonomous multi-agent chats or open-ended web browsing agents. |
+| **Response Actions** | Automated low-risk logging/tagging; human approval gate for containment (simulated account lockout, host isolation, firewall block). | Direct execution of destructive network-wide active directory changes or physical firewall reconfigurations. |
+| **Storage & Audit** | In-memory / file-based SQLite database with trigger-enforced append-only guarantees (`audit_no_update`, `audit_no_delete`). | Multi-region distributed CockroachDB/PostgreSQL clusters. |
+
+### Target Stakeholders & User Personas
+
+- **Tier-1 / Tier-2 SOC Analysts:** Triage high-volume alerts with immediate, citation-backed context rather than raw logs.
+- **Incident Responders:** Review correlated timelines and approve or refine surgical containment proposals.
+- **Security Engineering & Administrators:** Audit automated agent actions, configure tool allowlists, and inspect tamper-proof event logs.
+- **Security Leadership (CISOs & SOC Managers):** Gain visibility into triage accuracy, false-positive reductions, and response latencies without risking unmonitored automation.
