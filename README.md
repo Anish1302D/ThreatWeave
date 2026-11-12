@@ -279,3 +279,51 @@ sequenceDiagram
 5. **Remediation Planning:** The Response Agent proposes actions (e.g., block IP, isolate host, reset password, tag incident).
 6. **Human Approval Gate:** Low-risk administrative actions run automatically; high-risk actions pause until a human analyst submits an approval or rejection decision.
 7. **Resolution & Incident Reporting:** Once actions are executed or rejected, the incident is closed with a comprehensive markdown report and audit log summary.
+
+---
+
+## Current Prototype Status & Implementation Transparency
+
+To ensure complete transparency and prevent overstating capabilities, the following matrix contrasts what is **actually implemented** in the repository's prototype against what is currently **simulated** and what is **planned** for future development:
+
+| Capability / Subsystem | Implementation Status | Technical Mechanism in Codebase | Verification & Notes |
+|---|---|---|---|
+| **Four-Node Processing Workflow** | **Implemented** | `triage -> intel -> forensics -> response -> gate` state graph in `main.py` | Verified: alerts transition through deterministic graph nodes via async tasks. |
+| **Human Approval Gate** | **Implemented** | Async futures paused in `gate()` until analyst calls `/api/approve/{key}` | Verified: containment actions pause indefinitely until explicit approve/reject POST. |
+| **Agent Tool Allowlists** | **Implemented** | `ALLOW` dictionary lookup inside `call()` raising `PermissionError` | Verified: unauthorized tool invocations abort and log `tool_denied` events. |
+| **Append-Only Audit Logging** | **Implemented** | SQLite triggers `audit_no_update` and `audit_no_delete` | Verified: SQL `UPDATE` and `DELETE` queries on `audit` table raise abort exceptions. |
+| **Evidence Citation Enforcement** | **Implemented** | `citation_check` in `forensics()` cross-referencing claim IDs with log IDs | Verified: claims without verifiable log citations are filtered out from evidence. |
+| **Prompt Injection Quarantine** | **Implemented** | Regex scanner `INJECTION` quarantines malicious payloads and tests red-team resistance | Verified: prompt injections in log lines are excluded from claims; red-team checks blocked. |
+| **WebSocket Real-Time Trace** | **Implemented** | Starlette/FastAPI WebSocket endpoint (`/ws`) broadcasting to connected UI clients | Verified: full agent trace streamed live to browser with filtering. |
+| **Evaluation Metrics Endpoint** | **Implemented** | `/api/eval` computing TP, FP, FN, TN, precision, recall, and triage latency | Verified: evaluates confusion matrix across 7 scenario alerts. |
+| **Threat Intelligence Enrichment** | **Simulated / Rule-Based** | `lookup_ip()` uses hardcoded `KNOWN_BAD` and `KNOWN_GOOD` dictionaries | Simulated: mock data for AbuseIPDB and AlienVault OTX pulses. Live APIs not yet connected. |
+| **Security Telemetry & Event Ingestion**| **Simulated / Rule-Based** | Static `SCENARIO` (7 alerts) and `LOGS` (49 log lines) in `main.py` | Simulated: replayable scenario rather than live syslog/webhook listener. |
+| **Remediation Execution** | **Simulated / Rule-Based** | `SIM = lambda **k: f"simulated: {k}"` | Simulated: containment actions return mock strings; no active host/firewall changes. |
+| **Agent Reasoning** | **Rule-Based (Optional LLM)** | Deterministic Python heuristics with optional Anthropic Claude integration (`narrate()`) | Hybrid: rule-based baseline logic with optional LLM incident summary when API key is set. |
+| **Enterprise SIEM / EDR Adapters** | **Planned Architecture** | Connector interfaces specified in `docs/DEFENCEIQ_ARCHITECTURE.md` | Planned: Splunk, Elastic, CrowdStrike, and CloudTrail ingestion adapters. |
+| **Production Threat Intel APIs** | **Planned Architecture** | Live HTTP clients for AbuseIPDB, VirusTotal v3, and OTX | Planned: rate-limited caching connectors with API key management. |
+| **Google AI Models Integration** | **Planned Architecture** | Gemini 4 Argon, Gemini 3.8 Flash, and Gemini Embedding 2 adapters | Planned: Google AI Studio / Antigravity integration plan defined in architecture doc. |
+| **Production PostgreSQL & S3 Storage** | **Planned Architecture** | Relational schema with ER diagram specified in `docs/DEFENCEIQ_ARCHITECTURE.md` | Planned: migration from in-memory SQLite to PostgreSQL and object storage. |
+| **Next.js Analyst Dashboard** | **Planned Architecture** | Full-featured frontend with incident graph and multi-tenant management | Planned: evolution from single-file HTML/JS UI into enterprise web app. |
+
+---
+
+## Technology Stack
+
+The technology stack spans the active prototype implementation and the planned production target:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        DEFENCEIQ TECHNOLOGY STACK                       │
+├───────────────────────────────────┬────────────────────────────────────┤
+│ Current Prototype Implementation  │ Target Production Architecture     │
+├───────────────────────────────────┼────────────────────────────────────┤
+│ • Python 3.10+ (tested on 3.14)   │ • Python 3.11+ / FastAPI Microservices│
+│ • FastAPI & Starlette             │ • Google Gemini AI Models (Argon/Flash)│
+│ • Uvicorn ASGI Server             │ • PostgreSQL (Relational & JSONB)  │
+│ • SQLite3 with Trigger-Based Locks│ • Redis / Celery Task Queue        │
+│ • Asyncio State Graph             │ • Next.js 14+ / TypeScript Dashboard│
+│ • Native HTML5 / WebSocket Client │ • S3-Compatible Evidence Storage   │
+│ • Optional Anthropic API Client   │ • AbuseIPDB, VirusTotal, OTX APIs  │
+└───────────────────────────────────┴────────────────────────────────────┘
+```
