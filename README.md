@@ -417,3 +417,41 @@ DefenceIQ/
 ├── LICENSE                         # MIT Open Source License
 └── .gitignore                      # Git exclusion rules for Python caches, DBs, and environments
 ```
+
+---
+
+## Security, Governance & Human Approval
+
+Security in DefenceIQ is designed through defense-in-depth principles implemented directly in the core engine:
+
+### 1. Mandatory Human Approval Gate
+Autonomous systems that execute destructive containment actions (such as disabling executive accounts or severing network connectivity on production database hosts) present unacceptable business continuity risks.
+
+- **Engine-Level Pauses:** The human approval gate is not merely a cosmetic UI confirmation. In `gate()`, execution pauses on an uncompleted `asyncio.Future`. The action cannot execute until an authorized HTTP `POST /api/approve/{key}?ok=true` is received.
+- **Risk Tiering:** Low-risk administrative actions (`tag_alert`, `add_comment`) run automatically. High-risk actions (`block_ip`, `disable_account`, `force_password_reset`, `isolate_host`) mandate explicit human consent.
+- **Complete Rejection Handling:** If an analyst rejects an action (`ok=false`), the task safely cancels execution, logs the rejection reason to the immutable audit store, and moves the incident toward resolution without disruption.
+
+### 2. Prompt Injection Defense & Untrusted Input Isolation
+External telemetry—such as HTTP user-agent headers, syslog payloads, and raw email subject lines—is treated as adversarial, untrusted data.
+
+- **Regex Quarantine Filter:** The Forensics Agent runs regex heuristics (`INJECTION`) targeting prompt injection phrases (e.g., `ignore previous instructions`, `disable_firewall`, `you are now`).
+- **Exclusion from Evidence:** Quarantined log entries are completely excised from the evidence graph and prevented from contaminating downstream LLM reasoning contexts.
+- **Red-Team Resistance Validation:** The prototype includes an automated red-team test simulating an attacker injecting a command to invoke `disable_firewall`. The agent's strict tool allowlist immediately raises a `PermissionError` and emits a `tool_denied` security alert.
+
+### 3. Strict Evidence Provenance & Citation Check
+To prevent hallucinated conclusions, DefenceIQ implements a mandatory evidence citation verification check:
+- Every factual finding produced during investigation must provide an explicit list of raw telemetry record identifiers (`c = [l['id']]`).
+- The `citation_check` step cross-references all cited IDs against the set of verified ingested logs (`{l['id'] for l in LOGS}`).
+- Any assertion lacking a valid, verifiable citation is automatically rejected and excluded from the final incident report.
+
+### 4. Cryptographic & Append-Only Audit Integrity
+Audit logs must be forensically defensible in legal and compliance investigations:
+- In the prototype, SQLite database triggers (`audit_no_update`, `audit_no_delete`) abort any SQL modification attempt with `SELECT RAISE(ABORT, 'audit log is append-only')`.
+- In the target enterprise architecture, audit events are streamed to append-only immutable storage with cryptographic hash chains.
+
+### 5. Least-Privilege Agent Tool Allowlists
+Each agent operates inside a bounded capability envelope defined in the `ALLOW` configuration:
+- The Triage Agent can only query travel history.
+- The Threat Intel Agent can only query reputation tables and MITRE mappings.
+- The Forensics Agent can only query raw logs.
+- Containment tools are restricted exclusively to the Response Agent under human supervision.
