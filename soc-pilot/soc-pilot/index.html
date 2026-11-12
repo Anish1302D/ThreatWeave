@@ -1,0 +1,47 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SOC-Pilot</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--line:#30363d;--fg:#e6edf3;--mut:#8b949e;--ok:#3fb950;--bad:#f85149;--warn:#d29922;--acc:#58a6ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px system-ui,sans-serif}
+header{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+h1{font-size:16px;margin:0;flex:1}h2{font-size:13px;color:var(--mut);margin:0 0 8px}
+button{background:var(--acc);color:#04111f;border:0;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer}
+button.no{background:var(--bad);color:#fff}button.g{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+main{display:grid;grid-template-columns:280px 1fr 340px;gap:12px;padding:12px;height:calc(100vh - 54px)}
+section{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto}
+.al{padding:8px;border:1px solid var(--line);border-radius:6px;margin-bottom:6px;cursor:pointer}.al.sel{border-color:var(--acc)}
+.b{font-size:11px;padding:1px 6px;border-radius:10px;border:1px solid var(--line);color:var(--mut)}
+.ev{font:12px ui-monospace,monospace;padding:3px 0;border-bottom:1px solid #21262d}.ev b{color:var(--acc)}
+.k-tool_denied,.k-injection_quarantined,.k-red_team{color:var(--bad)}.k-approval_required{color:var(--warn)}.k-verdict,.k-approved{color:var(--ok)}
+pre{white-space:pre-wrap;font-size:12px}
+@media(max-width:900px){main{grid-template-columns:1fr;height:auto}}
+</style>
+<header><h1>SOC-Pilot</h1><button onclick="run()">Launch simulated attack</button><button class="g" onclick="ev_()">Run eval</button></header>
+<main>
+<section><h2>Alert queue</h2><div id="q"></div></section>
+<section><h2>Live agent trace <span id="f" class="b"></span> <button class="g" onclick="sel=null;draw()">Show all</button></h2><div id="t"></div></section>
+<section><h2>Pending approvals</h2><div id="p"></div><h2 style="margin-top:14px">Incident report and eval</h2><pre id="r"></pre></section>
+</main>
+<script>
+let E=[],A={},P={},sel=null;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function take(e){E.push(e);if(e.kind=='approval_required')P[e.data.key]=e;if(e.kind=='approved'||e.kind=='rejected_by_analyst')delete P[e.data.key]}
+async function load(){A={};(await (await fetch('/api/alerts')).json()).forEach(a=>A[a.id]=a);draw()}
+async function init(){
+  (await (await fetch('/api/audit')).json()).forEach(take);await load();
+  const w=new WebSocket((location.protocol=='https:'?'wss://':'ws://')+location.host+'/ws');
+  w.onmessage=m=>{take(JSON.parse(m.data));load()}
+}
+function draw(){
+  q.innerHTML=Object.values(A).map(a=>`<div class="al ${a.id==sel?'sel':''}" onclick="sel='${a.id}';draw()"><b>${a.id}</b> <span class="b">${esc(a.status)}</span><br>${esc(a.desc)}<br><small>${esc(a.severity||'')} ${a.confidence!=null?(a.confidence*100|0)+'%':''}</small></div>`).join('');
+  f.textContent=sel||'all alerts';
+  t.innerHTML=E.filter(e=>!sel||e.alert_id==sel).map(e=>`<div class="ev k-${e.kind}"><b>${esc(e.alert_id)} ${esc(e.agent)}</b> ${esc(e.msg)}</div>`).join('');
+  t.parentElement.scrollTop=1e9;
+  p.innerHTML=Object.values(P).map(e=>`<div class="al"><b>${esc(e.alert_id)}</b> ${esc(e.data.action)}<br><small>${esc(JSON.stringify(e.data.args))}</small><br><button onclick="ap('${e.data.key}',true)">Approve</button> <button class="no" onclick="ap('${e.data.key}',false)">Reject</button></div>`).join('')||'<small>Nothing waiting for approval</small>';
+  if(sel&&A[sel]&&A[sel].report)r.textContent=A[sel].report;
+}
+async function run(){const x=await fetch('/api/scenario/run',{method:'POST'});if(!x.ok)alert((await x.json()).detail)}
+async function ap(k,ok){await fetch('/api/approve/'+encodeURIComponent(k)+'?ok='+ok,{method:'POST'})}
+async function ev_(){r.textContent=JSON.stringify(await (await fetch('/api/eval')).json(),null,2)}
+init();
+</script>
