@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg)](https://fastapi.tiangolo.com)
-[![Team](https://img.shields.io/badge/Team-AMFinity-orange.svg)](#project-information)
+[![Team](https://img.shields.io/badge/Team-AMFinity-orange.svg)](#project-information--license)
 
 ---
 
@@ -455,3 +455,70 @@ Each agent operates inside a bounded capability envelope defined in the `ALLOW` 
 - The Threat Intel Agent can only query reputation tables and MITRE mappings.
 - The Forensics Agent can only query raw logs.
 - Containment tools are restricted exclusively to the Response Agent under human supervision.
+
+---
+
+## Development Roadmap
+
+The development trajectory of DefenceIQ is structured across seven phases, directly aligned with the [System Architecture Specification](docs/DEFENCEIQ_ARCHITECTURE.md#18-development-roadmap):
+
+```mermaid
+flowchart LR
+    P1["Phase 1<br/>Architecture & Design<br/>(Complete)"] --> P2["Phase 2<br/>Ingestion & Normalization"]
+    P2 --> P3["Phase 3<br/>Correlation & Threat Intel"]
+    P3 --> P4["Phase 4<br/>AI Investigation Workflow"]
+    P4 --> P5["Phase 5<br/>Evidence & Risk Engine"]
+    P5 --> P6["Phase 6<br/>Analyst Dashboard UI"]
+    P6 --> P7["Phase 7<br/>Testing & Deployment"]
+```
+
+| Phase | Milestone Name | Key Engineering Deliverables | Status |
+|---|---|---|---|
+| **Phase 1** | **Requirements & Architecture** | Complete system architecture specification, event schema draft, state lifecycle definitions, and threat threat models. | **Completed** |
+| **Phase 2** | **Ingestion & Normalization** | Production-ready ingestion adapters, strict Pydantic payload validation, and raw event deduplication. | *Planned* |
+| **Phase 3** | **Correlation & Threat Intelligence** | Time-window correlation rules, live AbuseIPDB/VirusTotal API integration, and automated MITRE ATT&CK mapping. | *Planned* |
+| **Phase 4** | **AI Investigation Workflow** | Google AI Studio model provider adapter (Gemini 4 Argon / Gemini 3.8 Flash), structured output validation, and LangGraph checkpointing. | *Planned* |
+| **Phase 5** | **Evidence & Risk Engine** | Persistent evidence graph, chronological incident timeline builder, and explainable deterministic risk scoring engine. | *Planned* |
+| **Phase 6** | **Dashboard & Reporting** | Enterprise Next.js/React investigation console, real-time WebSocket workspaces, and exportable compliance reports. | *Planned* |
+| **Phase 7** | **Hardening & Evaluation** | Adversarial prompt-injection test harness, enterprise benchmark evaluation suite, and production deployment topology. | *Planned* |
+
+---
+
+## Contribution Guidelines
+
+We welcome community contributions, bug reports, and architectural feedback. To maintain code quality and security standards, please adhere to these guidelines:
+
+### Development Workflow
+
+1. **Fork the Repository:** Create your own branch from `main`:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+2. **Commit Style:** Adhere strictly to [Conventional Commits](https://www.conventionalcommits.org/):
+   - `feat:` New features or capabilities
+   - `fix:` Bug fixes or patches
+   - `docs:` Documentation improvements
+   - `test:` Test additions or evaluation improvements
+   - `chore:` Maintenance, dependency updates, and metadata alignment
+3. **Verification & Testing:**
+   - Ensure all code conforms to PEP 8.
+   - Run verification tests and linting before submitting pull requests.
+   - Do not commit local database files (`*.db`), secrets, or environment files (`.env`).
+4. **Pull Requests:** Open a pull request against the `main` branch with a clear description of the problem solved, testing steps conducted, and references to any relevant architectural specifications.
+
+### Security Disclosure
+
+If you discover a security vulnerability or potential prompt-injection bypass within DefenceIQ, please report it privately to the maintainers rather than opening a public issue.
+
+---
+
+## Project Information & License
+
+- **Startup Name:** DefenceIQ
+- **Project Name:** DefenceIQ
+- **Team Name:** AMFinity
+- **Team Size:** 2
+- **Project Stage:** Initial Planning / Early Prototype
+- **License:** [MIT License](LICENSE) — see the [LICENSE](LICENSE) file for complete details.
+
+Copyright &copy; 2026 AMFinity / DefenceIQ. All rights reserved.
