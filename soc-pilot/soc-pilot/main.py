@@ -3,6 +3,7 @@ import asyncio, json, os, re, sqlite3, time
 from typing import Any
 import httpx
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 # ---------- storage (SQLite for the MVP; swap for async Postgres later) ----------
@@ -214,7 +215,22 @@ async def run_all():
         asyncio.create_task(run(a)); await asyncio.sleep(0.3)
 
 # ---------- API ----------
+DEFAULT_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app",
+]
+env_origins = [o.strip() for o in os.getenv("DEFENCEIQ_ALLOWED_ORIGINS", "").split(",") if o.strip()]
+ALLOWED_ORIGINS = env_origins if env_origins else DEFAULT_ALLOWED_ORIGINS
+
 app = FastAPI(title="DefenceIQ")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def index():
