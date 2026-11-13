@@ -3,6 +3,8 @@
 **AI-Powered Cybersecurity Platform for Threat Detection, Evidence-Backed Investigation & Human-Approved Response**
 
 [![Project Stage](https://img.shields.io/badge/Project%20Stage-Early%20Prototype%20%2F%20Planning-blue.svg)](docs/DEFENCEIQ_ARCHITECTURE.md)
+[![Production Frontend](https://img.shields.io/badge/Vercel-Production%20Frontend-black.svg?logo=vercel)](https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app)
+[![Production Backend](https://img.shields.io/badge/Render-FastAPI%20Backend-46E3B7.svg?logo=render)](https://defenceiq-api.onrender.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg)](https://fastapi.tiangolo.com)
@@ -11,8 +13,10 @@
 ---
 
 > [!IMPORTANT]
-> **Project Stage: Initial Planning & Early Prototype**  
-> DefenceIQ is currently in its initial planning and early prototype development stage. This repository contains an initial functional proof-of-concept demonstrating multi-agent state graph orchestration, agent tool allowlists, prompt-injection quarantine, and human approval gates, alongside the full proposed enterprise architecture detailed in [docs/DEFENCEIQ_ARCHITECTURE.md](docs/DEFENCEIQ_ARCHITECTURE.md).
+> **Live Production Deployments**
+> - **Frontend (Vercel):** [https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app](https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app)
+> - **Backend API (Render):** [https://defenceiq-api.onrender.com](https://defenceiq-api.onrender.com)
+> - **Deployment Guide:** See [docs/DEFENCEIQ_PRODUCTION_DEPLOYMENT.md](docs/DEFENCEIQ_PRODUCTION_DEPLOYMENT.md) for full topology, environment variables, CORS configuration, and WebSocket origin validation.
 
 ---
 
@@ -389,13 +393,23 @@ The application starts on `http://127.0.0.1:8000`.
 
 Configure DefenceIQ runtime parameters via environment variables or a `.env` file:
 
+### Backend Variables (Render / Local)
+
 | Variable | Type | Default | Description |
 |---|---|---|---|
+| `DEFENCEIQ_ALLOWED_ORIGINS` | String | `http://localhost:5173,http://127.0.0.1:5173,https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app` | Comma-separated list of approved HTTP and WebSocket origins for production and local environments. |
 | `SOCPILOT_DB` / `DEFENCEIQ_DB` | String | `:memory:` | SQLite database connection path. Set to a file path (e.g., `audit.db`) to persist alerts, incident status, and audit records across server restarts. |
 | `PACE` | Float | `0.6` | Delay in seconds between simulated agent actions. Slows down WebSocket streaming so human observers can follow the trace. Set to `0.2` for rapid automated execution. |
 | `ANTHROPIC_API_KEY` | String | *(None / Optional)* | When set, enables optional AI-generated natural language incident summaries via Claude. If omitted, the system falls back gracefully to deterministic rule-based reports. |
 | `MODEL` | String | `claude-sonnet-5-5` | Model identifier used for natural language narration when `ANTHROPIC_API_KEY` is active. |
-| `PORT` | Integer | `8000` | Local port for Uvicorn server execution. |
+| `PORT` | Integer | `8000` | Local port for Uvicorn server execution (automatically provided by Render in production). |
+
+### Frontend Variables (Vercel / Local)
+
+| Variable | Production Value | Description |
+|---|---|---|
+| `VITE_API_BASE` | `https://defenceiq-api.onrender.com` | Base URL for REST API endpoints. Normalizes trailing slashes automatically. |
+| `VITE_WS_URL` | `wss://defenceiq-api.onrender.com/ws` | Live WebSocket streaming endpoint. Automatically derives `wss://` from `VITE_API_BASE` if left unset. |
 
 ---
 
