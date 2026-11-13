@@ -23,6 +23,11 @@ export function createWsClient(opts: WsOptions): { close: () => void } {
   function url(): string {
     const explicit = import.meta.env.VITE_WS_URL as string | undefined;
     if (explicit) return explicit;
+    const apiBase = (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '');
+    if (apiBase) {
+      const wsBase = apiBase.replace(/^http/, 'ws');
+      return `${wsBase}/ws`;
+    }
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${location.host}/ws`;
   }
