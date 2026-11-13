@@ -149,3 +149,4 @@ All 9 test cases must pass:
 - WebSocket rejection with 1008 for unauthorized origin
 - Dynamic origin support via `DEFENCEIQ_ALLOWED_ORIGINS`
 - Single FastAPI instance assertion
+
