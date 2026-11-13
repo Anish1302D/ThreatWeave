@@ -40,3 +40,4 @@ Every frontend service and data model was built against verified endpoints in `m
 - **Icons**: `lucide-react`.
 - **State Management**: Zero heavyweight external stores; single lightweight React Context (`LiveStore`) coordinating alerts, audit log, and reconnecting WebSocket with exponential backoff.
 - **Client Services**: Native Fetch API with custom `ApiError` class, native WebSocket with automatic reconnect.
+

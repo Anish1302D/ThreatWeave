@@ -86,3 +86,4 @@ frontend/
 | **WebSocket Trace** | Auto-reconnecting Starlette WS client with deduplication and state synchronization | Verified |
 | **Strict Transparency** | Disclosed simulation boundaries (*Simulated action*, *Rule-based provenance*) | Verified |
 | **Type Safety & Build Cleanliness** | 100% strict TypeScript compliance, zero linter/compiler errors | Verified |
+

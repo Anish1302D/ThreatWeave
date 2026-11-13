@@ -103,3 +103,4 @@ The human-in-the-loop gate is an architectural boundary enforced via Python `asy
 3. An analyst reviews the proposed action, arguments, and supporting evidence in the UI.
 4. Calling `POST /api/approve/{key}?ok=true` sets the future result to `True`, executing the containment adapter.
 5. Calling `POST /api/approve/{key}?ok=false` sets the future result to `False`, aborting execution and recording an analyst rejection in the append-only ledger.
+

@@ -66,3 +66,4 @@ The immutable SQLite audit ledger recording all 69 events. Displays tool call pa
 Final operational state showing 7 total alerts, 3 escalated incidents, 5 pending approvals, and active pipeline indicator stages.
 
 ![Command Center (Active Pipeline & Updated KPIs)](./screenshots/09_command_center_final.png)
+
