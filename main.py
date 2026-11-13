@@ -282,6 +282,10 @@ def evaluate():
 
 @app.websocket("/ws")
 async def ws(w: WebSocket):
+    origin = w.headers.get("origin")
+    if not is_allowed_origin(origin):
+        await w.close(code=1008)
+        return
     await w.accept(); CLIENTS.add(w)
     try:
         while True: await w.receive_text()
