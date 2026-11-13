@@ -1,5 +1,6 @@
 """DefenceIQ Early Prototype: four agents + human approval gate, streamed over WebSocket."""
 import asyncio, json, os, re, sqlite3, time
+from typing import Any
 import httpx
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
@@ -49,7 +50,7 @@ LOGS = ([L(i, i, "login_failed", "bad password for rohan.k", "203.0.113.45", "VP
 
 # ---------- allow-listed tools: the only things an agent can ever do ----------
 SIM = lambda **k: f"simulated: {k}"
-TOOLS = {
+TOOLS: dict[str, Any] = {
     "query_history": lambda user: {"travels_often": user in TRAVELERS},
     "lookup_ip": lambda ip: KNOWN_BAD.get(ip) or {"abuseipdb": 0, "otx_pulses": 0, "tags": [KNOWN_GOOD.get(ip, "no reports")]},  # real: AbuseIPDB / VirusTotal / OTX
     "mitre_map": lambda atype: MITRE.get(atype, ("n/a", "unmapped")),
