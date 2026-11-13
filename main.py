@@ -3,6 +3,7 @@ import asyncio, json, os, re, sqlite3, time
 from typing import Any
 import httpx
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 # ---------- storage (SQLite for the MVP; swap for async Postgres later) ----------
@@ -221,6 +222,13 @@ DEFAULT_ALLOWED_ORIGINS = [
 ]
 
 app = FastAPI(title="DefenceIQ")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=DEFAULT_ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def index():
