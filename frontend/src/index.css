@@ -1,0 +1,86 @@
+/* ── DefenceIQ Design Tokens & Base Styles ─────────────────────────── */
+@import '@fontsource-variable/instrument-sans';
+@import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/newsreader';
+@import 'tailwindcss';
+
+/* ── Theme tokens ────────────────────────────────────────────────── */
+@theme {
+  --color-ink:              #10151D;
+  --color-ink-deep:         #0E131A;
+  --color-graphite:         #171F2A;
+  --color-surface:          #202A36;
+  --color-surface-hover:    #263040;
+  --color-ivory:            #ECEAE4;
+  --color-ivory-dim:        #C9C5BC;
+  --color-secondary:        #9AA5B2;
+  --color-tertiary:         #6B7886;
+  --color-amber:            #E7B75A;
+  --color-amber-dim:        #B8923F;
+  --color-vermilion:        #E16B5A;
+  --color-vermilion-dim:    #B5544A;
+  --color-teal:             #70B6A5;
+  --color-teal-dim:         #4E8F80;
+  --color-blue:             #6CA0DC;
+  --color-border:           #303B48;
+  --color-border-subtle:    #252F3A;
+
+  --font-sans:   'Instrument Sans Variable', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif:  'Newsreader Variable', 'Georgia', serif;
+  --font-mono:   'JetBrains Mono Variable', 'Fira Code', ui-monospace, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Base resets ─────────────────────────────────────────────────── */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink-deep);
+  color: var(--color-ivory);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-tertiary); }
+
+/* ── Focus ring ──────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Utilities ───────────────────────────────────────────────────── */
+@utility font-serif { font-family: var(--font-serif); }
+@utility font-mono  { font-family: var(--font-mono); }
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+@utility text-balance { text-wrap: balance; }
+
