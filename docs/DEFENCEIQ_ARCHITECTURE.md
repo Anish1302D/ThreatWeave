@@ -849,6 +849,24 @@ The scoring formula, weights, thresholds, and validation method remain to be des
 - Limit agent tools and permissions to the minimum required.
 - Prevent agents from directly bypassing approval controls.
 
+### 14.3 API and WebSocket Transport Security
+
+In the production deployment where the web frontend is hosted on Vercel and the backend service is hosted on Render, explicit origin controls are enforced:
+
+1. **Cross-Origin Resource Sharing (CORS):**
+   - Implemented via `fastapi.middleware.cors.CORSMiddleware` on the main FastAPI application.
+   - Restricts cross-origin HTTP API requests (e.g. `GET`, `POST`, `OPTIONS`) to approved origins:
+     - Local development: `http://localhost:5173`, `http://127.0.0.1:5173`
+     - Production Vercel: `https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app`
+     - Dynamic overrides: parsed via `DEFENCEIQ_ALLOWED_ORIGINS` environment variable.
+   - Enforces `allow_credentials=False` to prevent unauthorized credential exposure.
+   - Supports preflight `OPTIONS` handshakes across all REST API endpoints.
+
+2. **WebSocket Origin Validation (RFC 6455):**
+   - The `/ws` streaming endpoint validates the HTTP `Origin` header before socket acceptance.
+   - Unauthorized origins are rejected immediately with standard WebSocket close code `1008` (Policy Violation) prior to invoking `websocket.accept()`.
+   - Prevents Cross-Site WebSocket Hijacking (CSWSH) while streaming live multi-agent execution traces.
+
 ### 14.3 Human Approval
 
 The system should enforce approval in backend policy, not merely hide an execution button in the frontend.
