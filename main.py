@@ -214,6 +214,12 @@ async def run_all():
         asyncio.create_task(run(a)); await asyncio.sleep(0.3)
 
 # ---------- API ----------
+DEFAULT_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app",
+]
+
 app = FastAPI(title="DefenceIQ")
 
 @app.get("/")
