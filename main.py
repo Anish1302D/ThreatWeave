@@ -1,11 +1,11 @@
-"""DefenceIQ Early Prototype: four agents + human approval gate, streamed over WebSocket."""
+"""SOC-Pilot MVP: four agents + human approval gate, streamed over WebSocket."""
 import asyncio, json, os, re, sqlite3, time
 import httpx
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 
 # ---------- storage (SQLite for the MVP; swap for async Postgres later) ----------
-DB = sqlite3.connect(os.getenv("DEFENCEIQ_DB", os.getenv("SOCPILOT_DB", ":memory:")), check_same_thread=False)
+DB = sqlite3.connect(os.getenv("SOCPILOT_DB", ":memory:"), check_same_thread=False)
 DB.row_factory = sqlite3.Row
 DB.executescript("""
 CREATE TABLE IF NOT EXISTS alerts(id TEXT PRIMARY KEY, raw TEXT, status TEXT, severity TEXT, confidence REAL, report TEXT);
@@ -147,7 +147,7 @@ async def forensics(s):
 
 async def response(s):
     a = s["alert"]; aid = a["id"]
-    acts = [("tag_alert", {"tag": s["mitre"][0]}), ("add_comment", {"text": "DefenceIQ: " + a["desc"]})]
+    acts = [("tag_alert", {"tag": s["mitre"][0]}), ("add_comment", {"text": "SOC-Pilot: " + a["desc"]})]
     if s["intel"]["abuseipdb"] >= 50: acts.append(("block_ip", {"ip": a["src_ip"]}))
     if s["compromised"]: acts += [("disable_account", {"user": a["user"]}), ("force_password_reset", {"user": a["user"]})]
     if s["xfer"]: acts.append(("isolate_host", {"host": a["host"]}))
@@ -213,7 +213,7 @@ async def run_all():
         asyncio.create_task(run(a)); await asyncio.sleep(0.3)
 
 # ---------- API ----------
-app = FastAPI(title="DefenceIQ")
+app = FastAPI(title="SOC-Pilot")
 
 @app.get("/")
 def index():
