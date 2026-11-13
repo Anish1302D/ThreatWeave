@@ -404,18 +404,37 @@ Configure DefenceIQ runtime parameters via environment variables or a `.env` fil
 ```
 DefenceIQ/
 ├── docs/
-│   └── DEFENCEIQ_ARCHITECTURE.md   # Complete system architecture & technical design specification
+│   ├── DEFENCEIQ_ARCHITECTURE.md                   # Complete system architecture & technical design specification
+│   ├── DEFENCEIQ_FRONTEND_IMPLEMENTATION_PLAN.md   # Verified backend contracts, route schemas & design tokens
+│   ├── DEFENCEIQ_FRONTEND_COMPLETION_REPORT.md     # Engineering completion report & component verification
+│   ├── DEFENCEIQ_BROWSER_VERIFICATION_WALKTHROUGH.md # End-to-end browser walkthrough & visual validation
+│   ├── screenshots/                                # High-resolution Chrome platform captures (9 screens)
+│   └── ai-logs/                                    # AI multi-agent execution traces & evaluation logs
+│       ├── 01_multi_agent_execution_trace.json     # 83-event audit log of all 4 AI agents & approval gates
+│       ├── 02_api_contract_probe_log.json          # Response payloads & HTTP status verification
+│       ├── 03_evaluation_metrics_and_benchmarks.json # Classification confusion matrix & triage latencies
+│       ├── 04_agent_decisions_and_reasoning.md     # Agent tool allowlists, prompt-injection defense & citations
+│       └── 05_browser_automation_audit.md          # Chrome DevTools Protocol automation audit trail
+├── frontend/                                       # Production React 19 + TypeScript + Vite 8 analyst workspace
+│   ├── src/
+│   │   ├── components/                             # Reusable design system primitives & dialogs
+│   │   ├── pages/                                  # 6 core modules (Command Center, Investigation, etc.)
+│   │   ├── services/                               # Typed fetch API and reconnecting WebSocket client
+│   │   ├── state/                                  # Real-time LiveStore and notification contexts
+│   │   └── types/                                  # Strict TypeScript domain models
+│   ├── package.json
+│   └── vite.config.ts
 ├── soc-pilot/
-│   └── soc-pilot/                  # Packaged reference prototype and requirements
-│       ├── index.html              # Standalone prototype UI
-│       ├── main.py                 # Reference server implementation
-│       ├── README.md               # Quick-start instructions
-│       └── requirements.txt        # Pinned core dependencies
-├── main.py                         # Root ASGI application: state graph, 4 agents, tools, audit triggers
-├── index.html                      # Single-page web dashboard with WebSocket live streaming
-├── README.md                       # Comprehensive repository documentation & landing page
-├── LICENSE                         # MIT Open Source License
-└── .gitignore                      # Git exclusion rules for Python caches, DBs, and environments
+│   └── soc-pilot/                                  # Packaged reference prototype and requirements
+│       ├── index.html                              # Standalone prototype UI
+│       ├── main.py                                 # Reference server implementation
+│       ├── README.md                               # Quick-start instructions
+│       └── requirements.txt                        # Pinned core dependencies
+├── main.py                                         # Root ASGI application: state graph, 4 agents, tools, audit triggers
+├── index.html                                      # Legacy single-page web dashboard with WebSocket live streaming
+├── README.md                                       # Comprehensive repository documentation & landing page
+├── LICENSE                                         # MIT Open Source License
+└── .gitignore                                      # Git exclusion rules for Python caches, DBs, and environments
 ```
 
 ---
