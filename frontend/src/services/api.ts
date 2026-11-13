@@ -2,7 +2,7 @@
 
 import type { Alert, AuditEvent, EvalResult } from '../types';
 
-const BASE = import.meta.env.VITE_API_BASE ?? '';
+const BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 export class ApiError extends Error {
   constructor(
