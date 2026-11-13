@@ -1,0 +1,12 @@
+﻿{
+    "alerts":  7,
+    "true_pos":  3,
+    "false_pos":  0,
+    "false_neg":  0,
+    "true_neg":  4,
+    "detection_rate":  1.0,
+    "false_positive_rate":  0.0,
+    "avg_triage_ms":  0.016,
+    "manual_baseline_min_per_alert":  15,
+    "note":  "7 hand-labelled scenario alerts and an assumed manual baseline: demo numbers, not a benchmark"
+}
