@@ -12,6 +12,7 @@ Validates that:
 """
 import pytest
 from starlette.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 from main import app, ALLOWED_ORIGINS, is_allowed_origin
 
 client = TestClient(app)
@@ -68,3 +69,48 @@ def test_cors_get_alerts_allowed_origin():
     response = client.get("/api/alerts", headers={"Origin": PRODUCTION_VERCEL_ORIGIN})
     assert response.status_code == 200
     assert response.headers.get("access-control-allow-origin") == PRODUCTION_VERCEL_ORIGIN
+
+# ==============================================================================
+# 2. WebSocket Origin Validation Tests
+# ==============================================================================
+
+def test_websocket_allowed_production_origin():
+    """Verify WebSocket handshake succeeds from approved Vercel production origin."""
+    with client.websocket_connect("/ws", headers={"origin": PRODUCTION_VERCEL_ORIGIN}) as ws:
+        assert ws is not None
+
+def test_websocket_allowed_localhost_origin():
+    """Verify WebSocket handshake succeeds from approved localhost development origin."""
+    with client.websocket_connect("/ws", headers={"origin": LOCAL_DEV_ORIGIN}) as ws:
+        assert ws is not None
+
+def test_websocket_allowed_no_origin_header():
+    """Verify non-browser / CLI client connecting without Origin header is accepted."""
+    with client.websocket_connect("/ws") as ws:
+        assert ws is not None
+
+def test_websocket_rejected_unauthorized_origin():
+    """Verify WebSocket handshake from unauthorized origin is closed with policy violation before accept."""
+    try:
+        with client.websocket_connect("/ws", headers={"origin": UNAUTHORIZED_ORIGIN}) as ws:
+            pytest.fail("WebSocket connection should have been rejected for unauthorized origin")
+    except WebSocketDisconnect as e:
+        assert e.code == 1008
+    except Exception as e:
+        # In Starlette TestClient, connection rejection may surface as WebSocketDisconnect or Exception with 1008
+        assert "1008" in str(e) or isinstance(e, WebSocketDisconnect)
+
+# ==============================================================================
+# 3. Unit Tests for is_allowed_origin helper
+# ==============================================================================
+
+def test_is_allowed_origin_helper():
+    """Verify normalization and edge cases of the origin validation helper."""
+    assert is_allowed_origin(PRODUCTION_VERCEL_ORIGIN) is True
+    assert is_allowed_origin(PRODUCTION_VERCEL_ORIGIN + "/") is True
+    assert is_allowed_origin(LOCAL_DEV_ORIGIN) is True
+    assert is_allowed_origin(LOCAL_IP_ORIGIN) is True
+    assert is_allowed_origin(None) is True
+    assert is_allowed_origin("") is True
+    assert is_allowed_origin("https://evil.com") is False
+    assert is_allowed_origin("http://localhost:3000") is False
