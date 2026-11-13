@@ -232,6 +232,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def is_allowed_origin(origin: str | None) -> bool:
+    if not origin:
+        return True
+    return origin.rstrip("/") in {o.rstrip("/") for o in ALLOWED_ORIGINS}
+
 @app.get("/")
 def index():
     return FileResponse(os.path.join(os.path.dirname(__file__), "index.html"))
@@ -277,6 +282,10 @@ def evaluate():
 
 @app.websocket("/ws")
 async def ws(w: WebSocket):
+    origin = w.headers.get("origin")
+    if not is_allowed_origin(origin):
+        await w.close(code=1008)
+        return
     await w.accept(); CLIENTS.add(w)
     try:
         while True: await w.receive_text()
