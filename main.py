@@ -220,11 +220,13 @@ DEFAULT_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app",
 ]
+env_origins = [o.strip() for o in os.getenv("DEFENCEIQ_ALLOWED_ORIGINS", "").split(",") if o.strip()]
+ALLOWED_ORIGINS = env_origins if env_origins else DEFAULT_ALLOWED_ORIGINS
 
 app = FastAPI(title="DefenceIQ")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=DEFAULT_ALLOWED_ORIGINS,
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
