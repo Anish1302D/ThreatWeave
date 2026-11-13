@@ -8,6 +8,7 @@
     "dev": "vite",
     "typecheck": "tsc -b --noEmit",
     "build": "tsc -b && vite build",
+    "validate": "tsc -b --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
