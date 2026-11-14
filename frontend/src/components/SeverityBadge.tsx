@@ -3,15 +3,15 @@
 import type { Severity } from '../types';
 
 const STYLES: Record<Severity, string> = {
-  high: 'bg-vermilion/15 text-vermilion border-vermilion/30',
-  medium: 'bg-amber/15 text-amber border-amber/30',
-  low: 'bg-secondary/10 text-secondary border-secondary/20',
+  high:   'bg-vermilion/12 text-vermilion border-vermilion/35',
+  medium: 'bg-amber/12 text-amber border-amber/35',
+  low:    'bg-surface/80 text-secondary border-border',
 };
 
 const SHAPES: Record<Severity, string> = {
-  high: '▲',
+  high:   '▲',
   medium: '◆',
-  low: '●',
+  low:    '●',
 };
 
 interface Props {
@@ -20,15 +20,14 @@ interface Props {
 }
 
 export function SeverityBadge({ severity, className = '' }: Props) {
-  if (!severity) return <span className={`text-xs text-tertiary ${className}`}>—</span>;
+  if (!severity) return <span className={`text-xs text-tertiary font-mono ${className}`}>—</span>;
   return (
     <span
-      className={`inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider
-                   border rounded px-1.5 py-0.5 ${STYLES[severity]} ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 text-[10px] font-mono font-medium uppercase tracking-wider
+                   border rounded-full px-2 py-0.5 leading-tight ${STYLES[severity]} ${className}`}
     >
       <span className="text-[8px] leading-none">{SHAPES[severity]}</span>
       {severity}
     </span>
   );
 }
-

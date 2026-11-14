@@ -29,13 +29,17 @@ export function ToastContainer() {
         return (
           <div
             key={t.id}
-            className={`flex items-start gap-2 bg-graphite border rounded-md px-3 py-2.5 shadow-xl
+            className={`flex items-start gap-2.5 bg-graphite/95 backdrop-blur-sm border rounded-lg px-3.5 py-2.5 shadow-2xl
                         animate-[fadeIn_0.2s_ease-out] ${COLORS[t.type]}`}
           >
             <Icon size={16} className="mt-0.5 shrink-0" />
-            <p className="text-sm text-ivory flex-1">{t.message}</p>
-            <button onClick={() => removeToast(t.id)} className="text-secondary hover:text-ivory shrink-0">
-              <X size={14} />
+            <p className="text-xs leading-relaxed text-ivory flex-1">{t.message}</p>
+            <button
+              onClick={() => removeToast(t.id)}
+              className="text-secondary hover:text-ivory shrink-0 p-0.5 rounded hover:bg-surface cursor-pointer"
+              aria-label="Dismiss notification"
+            >
+              <X size={13} />
             </button>
           </div>
         );
@@ -43,4 +47,3 @@ export function ToastContainer() {
     </div>
   );
 }
-

@@ -7,23 +7,23 @@
 /* ── Theme tokens ────────────────────────────────────────────────── */
 @theme {
   --color-ink:              #10151D;
-  --color-ink-deep:         #0E131A;
-  --color-graphite:         #171F2A;
-  --color-surface:          #202A36;
-  --color-surface-hover:    #263040;
+  --color-ink-deep:         #0B1016;
+  --color-graphite:         #151C26;
+  --color-surface:          #1D2633;
+  --color-surface-hover:    #253041;
   --color-ivory:            #ECEAE4;
   --color-ivory-dim:        #C9C5BC;
   --color-secondary:        #9AA5B2;
   --color-tertiary:         #6B7886;
   --color-amber:            #E7B75A;
-  --color-amber-dim:        #B8923F;
+  --color-amber-dim:        #C4963D;
   --color-vermilion:        #E16B5A;
-  --color-vermilion-dim:    #B5544A;
+  --color-vermilion-dim:    #BD5345;
   --color-teal:             #70B6A5;
-  --color-teal-dim:         #4E8F80;
+  --color-teal-dim:         #509182;
   --color-blue:             #6CA0DC;
-  --color-border:           #303B48;
-  --color-border-subtle:    #252F3A;
+  --color-border:           #2B3645;
+  --color-border-subtle:    #1F2835;
 
   --font-sans:   'Instrument Sans Variable', 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif:  'Newsreader Variable', 'Georgia', serif;
@@ -34,6 +34,17 @@
   --radius-lg: 8px;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.98) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* ── Base resets ─────────────────────────────────────────────────── */
@@ -84,3 +95,24 @@ body {
 
 @utility text-balance { text-wrap: balance; }
 
+@utility app-canvas {
+  background-color: var(--color-ink-deep);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -15%, rgba(108, 160, 220, 0.06), transparent),
+    radial-gradient(ellipse 50% 40% at 85% 0%, rgba(231, 183, 90, 0.03), transparent);
+}
+
+@utility panel-card {
+  background-color: rgba(21, 28, 38, 0.86);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.035),
+    0 10px 28px -16px rgba(0, 0, 0, 0.75);
+}
+
+@utility panel-inset {
+  background-color: rgba(11, 16, 22, 0.75);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+}
