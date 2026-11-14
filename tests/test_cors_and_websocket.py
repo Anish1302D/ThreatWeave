@@ -18,6 +18,7 @@ from main import app, ALLOWED_ORIGINS, is_allowed_origin
 client = TestClient(app)
 
 PRODUCTION_VERCEL_ORIGIN = "https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app"
+THETA_VERCEL_ORIGIN = "https://defenceiq-theta.vercel.app"
 LOCAL_DEV_ORIGIN = "http://localhost:5173"
 LOCAL_IP_ORIGIN = "http://127.0.0.1:5173"
 UNAUTHORIZED_ORIGIN = "https://malicious-attacker.com"
@@ -65,19 +66,21 @@ def test_cors_preflight_unauthorized_rejected():
     assert response.headers.get("access-control-allow-origin") is None
 
 def test_cors_get_alerts_allowed_origin():
-    """Verify GET /api/alerts includes Access-Control-Allow-Origin header for approved origin."""
-    response = client.get("/api/alerts", headers={"Origin": PRODUCTION_VERCEL_ORIGIN})
-    assert response.status_code == 200
-    assert response.headers.get("access-control-allow-origin") == PRODUCTION_VERCEL_ORIGIN
+    """Verify GET /api/alerts includes Access-Control-Allow-Origin header for approved origins."""
+    for origin in (PRODUCTION_VERCEL_ORIGIN, THETA_VERCEL_ORIGIN):
+        response = client.get("/api/alerts", headers={"Origin": origin})
+        assert response.status_code == 200
+        assert response.headers.get("access-control-allow-origin") == origin
 
 # ==============================================================================
 # 2. WebSocket Origin Validation Tests
 # ==============================================================================
 
 def test_websocket_allowed_production_origin():
-    """Verify WebSocket handshake succeeds from approved Vercel production origin."""
-    with client.websocket_connect("/ws", headers={"origin": PRODUCTION_VERCEL_ORIGIN}) as ws:
-        assert ws is not None
+    """Verify WebSocket handshake succeeds from approved Vercel production origins."""
+    for origin in (PRODUCTION_VERCEL_ORIGIN, THETA_VERCEL_ORIGIN):
+        with client.websocket_connect("/ws", headers={"origin": origin}) as ws:
+            assert ws is not None
 
 def test_websocket_allowed_localhost_origin():
     """Verify WebSocket handshake succeeds from approved localhost development origin."""
@@ -108,6 +111,8 @@ def test_is_allowed_origin_helper():
     """Verify normalization and edge cases of the origin validation helper."""
     assert is_allowed_origin(PRODUCTION_VERCEL_ORIGIN) is True
     assert is_allowed_origin(PRODUCTION_VERCEL_ORIGIN + "/") is True
+    assert is_allowed_origin(THETA_VERCEL_ORIGIN) is True
+    assert is_allowed_origin(THETA_VERCEL_ORIGIN + "/") is True
     assert is_allowed_origin(LOCAL_DEV_ORIGIN) is True
     assert is_allowed_origin(LOCAL_IP_ORIGIN) is True
     assert is_allowed_origin(None) is True

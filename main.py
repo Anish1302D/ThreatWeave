@@ -218,6 +218,7 @@ async def run_all():
 DEFAULT_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://defenceiq-theta.vercel.app",
     "https://defenceiq-5iazzx3nb-madhura-lakade-s-projects.vercel.app",
 ]
 env_origins = [o.strip() for o in os.getenv("DEFENCEIQ_ALLOWED_ORIGINS", "").split(",") if o.strip()]
